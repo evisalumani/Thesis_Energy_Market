@@ -4,7 +4,7 @@
 
 * [Install Hyperledger prerequisites](https://hyperledger.github.io/composer/latest/installing/installing-prereqs)
 * [Install Hyperledger dev environment (v0.20.0)](https://hyperledger.github.io/composer/latest/installing/development-tools)
-* Install Python numpy and scipy, e.g. via the Anaconda distribution
+* Install Python numpy and scipy (e.g. via the Anaconda distribution), and Flask
 * In the folders /hyperledger-client, /market-clock and /tx-queue run `npm install`. In the folder /energy-market, run `npm install --python=python2.7`.
 
 
