@@ -1,0 +1,22 @@
+{
+  "name": "energy-market",
+  "version": "0.0.1",
+  "description": "Decentralized Energy Trading Business Network",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "author": "Evisa Lumani",
+  "email": "evisa.lumani@gmail.com",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "composer-admin": "latest",
+    "composer-client": "latest",
+    "composer-common": "latest",
+    "composer-connector-embedded": "latest",
+    "chai": "latest",
+    "eslint": "latest",
+    "istanbul": "latest",
+    "mkdirp": "latest",
+    "mocha": "latest"
+  }
+}

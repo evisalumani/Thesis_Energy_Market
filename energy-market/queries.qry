@@ -1,0 +1,6 @@
+query selectEnergyDeliveryMonitorByGame {
+  description: "Select the EnergyDeliveryMonitor for a game"
+  statement:
+      SELECT org.acme.biznet.EnergyDeliveryMonitor
+          WHERE (game == _$game)
+}

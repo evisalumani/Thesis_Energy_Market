@@ -1,0 +1,16 @@
+{
+  "name": "hyperledger-client",
+  "version": "1.0.0",
+  "description": "Client representing prosumer and interacting with blockchain layer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Evisa Lumani",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "winston": "^3.1.0",
+    "ws": "^6.0.0"
+  }
+}

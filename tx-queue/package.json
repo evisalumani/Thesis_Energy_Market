@@ -1,0 +1,18 @@
+{
+  "name": "tx_queue",
+  "version": "1.0.0",
+  "description": "Queue for submitting transactions to Hyperledger",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Evisa Lumani",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "queue": "^4.5.0",
+    "winston": "^3.1.0"
+  }
+}

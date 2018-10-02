@@ -1,0 +1,138 @@
+/**
+ *	Business network definition.
+ */
+namespace org.acme.biznet
+
+participant Prosumer identified by prosumerID {
+  o String prosumerID
+  o Double accountBalance default = 1000.0
+  o Double frozenFunds default = 0.0
+  o Double totalProduction default = 0.0
+  o Double totalConsumption default = 0.0
+  o Double contributionMetric default = 0.0
+}
+
+transaction BaseTransaction {
+  --> Prosumer initiator
+}
+
+@returns(String)
+transaction PublishGame {
+  o Double registrationDurationMs default = 10000.0
+}
+
+
+transaction PublishOffer extends BaseTransaction {
+  --> Game game
+  o Double amount
+  o Double price
+}
+
+transaction PublishDemand extends BaseTransaction {
+  --> Game game
+  o Double amount
+}
+
+transaction StopGameRegistration {
+  --> Game game
+}
+
+asset Game identified by gameID {
+  // Game details
+  o String gameID
+  o DateTime registrationStartTimestamp
+  o Double registrationDurationMs
+  o Boolean acceptsRegistrations default=true
+  o Integer nrRounds default=1
+  
+  // Game participants
+  --> Prosumer[] participants
+  --> Prosumer[] sellers
+  --> Prosumer[] buyersOrdered
+  o Integer nrBuyers default = 0
+  o Integer nrSellers default = 0
+  
+  // Offers
+  o Double[] offersAmounts 
+  o Double[] offersPrices
+  // Demands
+  o Double[] demands
+  
+  // Players monitoring
+  o Boolean[] buyersKeepPlaying
+  o Boolean[] buyersPlayedCurrentRound 
+  o Boolean[] buyersKeepPlayingPrevious
+  
+  // Bids
+  o BuyBid[] buyBids 
+}
+
+concept BuyBid {
+  o Double[] bidAmounts
+}
+
+// TODO: Split into 2 transactions (PublishBuyBid, LeaveGame)?
+transaction PublishBuyBid extends BaseTransaction {
+  --> Game game
+  o Double[] bidAmounts optional
+  o Boolean keepPlaying
+}
+
+asset EnergyDeliveryMonitor identified by monitoringID {
+  o String monitoringID
+  // The game which it monitors
+  --> Game game 
+
+  // Energy flows
+  o Double[] totalInByBuyer
+  o Double[] totalInBySeller
+  o Double[] totalOutByBuyer
+  o Double[] totalOutBySeller
+  --> EnergyTransfer[] pendingEnergyTransfers
+}
+
+asset EnergyTransfer identified by transferID {
+  o String transferID
+  --> Game game
+  --> Prosumer from
+  --> Prosumer to
+  o Double amount
+  o Double cost
+  o Boolean isFulfilled default=false
+}
+
+transaction PublishMeterReading extends BaseTransaction {
+  o Double inEnergy
+  o Double outEnergy
+  --> Game game
+}
+
+transaction CloseMarket {
+  --> Game game
+}
+
+event GameInitEvent {
+  --> Game game
+  o String gameID
+}
+
+event BuyBidEvent {
+  --> Game game
+  --> Prosumer buyerInTurn
+  o Integer buyerInTurnIndex
+}
+
+event GameStopEvent {
+  o Integer totalNrRounds
+}
+
+event TransferFulfilledEvent {
+}
+
+event AccountTopUpRequired {
+
+}
+
+event TestEvent {
+  o String message
+}
