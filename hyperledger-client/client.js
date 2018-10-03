@@ -2,14 +2,6 @@ const WebSocket = require('ws');
 const logger = require('./logger').logger;
 const RestClient = require('./rest-client').RestClient;
 
-/**
- * Events
- */
-const EVENT_GAME_INIT = 'GameInitEvent';
-const EVENT_BUY_BID = 'BuyBidEvent';
-const EVENT_GAME_STOP = 'GameStopEvent';
-const EVENT_TRANSFER_FULFILLED = 'TransferFulfilledEvent';
-
 class Client {
 	constructor(prosumerID, amount) {
 		this.prosumerID = prosumerID;
@@ -243,7 +235,6 @@ function errorHandling(error) {
 	} else {
 		logger.error(error.response.data);
 	}
-    // logger.error(error.response.data == undefined ? (error.response == undefined ? error : error.response) : error.response.data);
 }
 
 module.exports.SellerClient = Seller;

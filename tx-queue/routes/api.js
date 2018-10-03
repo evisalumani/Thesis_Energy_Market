@@ -10,11 +10,6 @@ let q = queue({concurrency:1});
 let restClient = new RestClient();
 let results = []; /** Results of transaction submissions */
 
-const PUBLISH_OFFER = 'publishOffer';
-const PUBLISH_DEMAND = 'publishDemand';
-const PUBLISH_BUY_BID = 'publishBuyBid';
-const PUBLISH_METER_READING = 'publishMeterReading';
-
 /**
  * Map of topics to transaction submission functions
  */
@@ -33,7 +28,7 @@ q.on('success', function (result, job) {
  * Error handler for errors returned from Hyperledger
  */
 q.on('error', (error, job) => {
-    logger.error(error.response.data|| error.response || error);
+    errorHandling(error);
 })
 
 /* GET / */
@@ -94,6 +89,16 @@ router.post('/queue', (req, res) => {
 process.on('unhandledRejection', error => {
     logger.error(`unhandledRejection: ${error}`);
 });
+
+function errorHandling(error) {
+	if (!error.response) {
+		logger.error(error);
+	} else if (!error.response.data) {
+		logger.error(error.response);
+	} else {
+		logger.error(error.response.data);
+	}
+}
   
 
 module.exports = router;

@@ -41,7 +41,7 @@ class EnergyOptimization:
         return solution_rounded;
 
     def decentralized_cost_function(self, x):
-        sellers_used_capacity = self.used_capacities + x; # current load + the load from the current buyer;
+        sellers_used_capacity = self.used_capacities + x; # current load + the load from the current buyer
         sellers_load = 1 + np.divide(sellers_used_capacity, self.sellers_capacity);
         
         transmission_cost_per_hop = 0.02;

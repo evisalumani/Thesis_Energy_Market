@@ -30,11 +30,18 @@ class MarketClock {
     .then(() => {
         logger.info("Game registration stopped");
     })
-    .catch(error => {
-        // logger.error(error || error.response || error.response.data);
-        logger.error(error.response.data == undefined ? (error.response == undefined ? error : error.response) : error.response.data);
-    });
+    .catch(errorHandling);
   }
+}
+
+function errorHandling(error) {
+	if (!error.response) {
+		logger.error(error);
+	} else if (!error.response.data) {
+		logger.error(error.response);
+	} else {
+		logger.error(error.response.data);
+	}
 }
 
 let clock = new MarketClock();

@@ -1,6 +1,4 @@
 from flask import Flask, jsonify, json, request, Response
-# import os
-# import socket
 from optimization import EnergyOptimization
 
 app = Flask(__name__)
