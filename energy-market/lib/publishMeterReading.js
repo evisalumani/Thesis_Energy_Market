@@ -25,7 +25,7 @@ async function onPublishMeterReading(meterReadingTx) {
         return Promise.reject("Prosumer is not registered in the game");
     }
 
-    const monitors = await query('selectEnergyDeliveryMonitorByGame', {"game": game});
+    const monitors = await query('selectEnergyDeliveryMonitorByGame', {game: gameRef.toURI()});
     if (monitors.length != 1) {
         return Promise.reject("No or more than one EnergyDeliveryMonitor created for this game");
     }
@@ -38,10 +38,10 @@ async function onPublishMeterReading(meterReadingTx) {
     prosumer.contributionMetric = prosumer.totalConsumption == 0 ? 0 : prosumer.totalProduction / prosumer.totalConsumption;
     await prosumerRegistry.update(prosumer);
     
-    const isSeller = sellerIdx == -1 ? true : false; 
+    const isSeller = sellerIdx == -1 ? false : true; 
 
     // Update in and out energy monitored
-    if (isSeller) {
+    if (isSeller == true) {
         // Prosumer is a seller
         monitor.totalInBySeller[sellerIdx] = monitor.totalInBySeller[sellerIdx] + inEnergy;
         monitor.totalOutBySeller[sellerIdx] = monitor.totalOutBySeller[sellerIdx] + outEnergy;
@@ -52,10 +52,12 @@ async function onPublishMeterReading(meterReadingTx) {
     }
     
     const nrPending = monitor.pendingEnergyTransfers.length;
+    let transferRegistry = await getAssetRegistry(NAMESPACE + '.' + ENERGY_TRANSFER);
 
     // Check if any pending energy transfer can be cleared
     for (let i = nrPending - 1; i >= 0; i--) {
-        let transfer = monitor.pendingEnergyTransfers[i];
+        let transferRef = monitor.pendingEnergyTransfers[i]; // A reference
+        let transfer = await transferRegistry.get(transferRef.$identifier); // A resource
 
         if (transfer.from.$identifier == prosumer.$identifier || transfer.to.$identifier == prosumer.$identifier) {
             const _sellerIdx = indexOfResourceInArray(transfer.from, game.sellers);
@@ -88,5 +90,10 @@ async function onPublishMeterReading(meterReadingTx) {
     }
 
     // Update registry
+    let monitorRegistry = await getAssetRegistry(NAMESPACE + '.' + ENERGY_DELIVERY_MONITOR);
     await monitorRegistry.update(monitor);    
 }
+
+/**
+ * TODO: Emit EVENT_TRANSFER_FULFILLED
+ */

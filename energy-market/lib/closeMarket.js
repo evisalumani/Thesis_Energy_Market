@@ -6,14 +6,14 @@
  * @transaction
  */
 async function onCloseMarket(closeMarketTx) {
-    const gameRef = meterReadingTx.game;
+    const gameRef = closeMarketTx.game;
 
     const gameRegistry = await getAssetRegistry(NAMESPACE + '.' + GAME);
     const game = await gameRegistry.get(gameRef.$identifier);
 
     const prosumerRegistry = await getParticipantRegistry(NAMESPACE + '.' + PROSUMER);
 
-    const monitors = await query('selectEnergyDeliveryMonitorByGame', {"game": game});
+    const monitors = await query('selectEnergyDeliveryMonitorByGame', {game: gameRef.toURI()});
     if (monitors.length != 1) {
         return Promise.reject("No or more than one EnergyDeliveryMonitor created for this game");
     }
@@ -22,10 +22,13 @@ async function onCloseMarket(closeMarketTx) {
 
     // Clear up pending energy transfers from the game
     const nrPending = monitor.pendingEnergyTransfers.length;
+    let transferRegistry = await getAssetRegistry(NAMESPACE + '.' + ENERGY_TRANSFER);
 
     for (let i=0; i < nrPending - 1; i++) {
         // Unfreeze funds 
-        let transfer = monitor.pendingEnergyTransfers[i];
+        let transferRef = monitor.pendingEnergyTransfers[i]; // A reference
+        let transfer = await transferRegistry.get(transferRef.$identifier); // A resource
+        
         const buyer = await prosumerRegistry.get(transfer.to.$identifier);
 
         buyer.frozenFunds = buyer.frozenFunds - transfer.cost;

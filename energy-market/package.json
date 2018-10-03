@@ -1,6 +1,6 @@
 {
   "name": "energy-market",
-  "version": "0.0.1",
+  "version": "0.0.2-deploy.0.0.31",
   "description": "Decentralized Energy Trading Business Network",
   "scripts": {
     "test": "mocha --recursive"
