@@ -26,13 +26,14 @@ async function onPublishGame(publishGameTx) {  // eslint-disable-line no-unused-
     game.sellers = [];
   	game.buyersOrdered = [];
   
-  
     game.offersAmounts = [];
     game.offersPrices = [];
     game.demands = [];
     game.buyersKeepPlaying = [];
     game.buyersPlayedCurrentRound = [];
     game.buyersKeepPlayingPrevious = [];
+
+    game.hopDistances = [];
 
     game.buyBids = [];
 

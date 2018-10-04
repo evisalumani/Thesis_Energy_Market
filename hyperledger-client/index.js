@@ -1,5 +1,3 @@
-// process.env.HOP_DISTANCES
-
 const SellerClient = require('./client').SellerClient;
 const BuyerClient = require('./client').BuyerClient;
 

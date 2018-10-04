@@ -140,7 +140,8 @@ class Buyer extends Client {
 			game.buyBids.map(bid => bid.bidAmounts),
 			buyerInTurnIndex);
 
-		const hopDistances = JSON.parse("[" + process.env.HOP_DISTANCES + "]");
+		const hopDistances = game.hopDistances[buyerInTurnIndex].hops;
+		// const hopDistances = JSON.parse("[" + process.env.HOP_DISTANCES + "]");
 
 		logger.silly(`Sellers used capacities: ${usedCapacities}`);
 		

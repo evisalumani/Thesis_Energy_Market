@@ -21,7 +21,6 @@ transaction PublishGame {
   o Double registrationDurationMs default = 10000.0
 }
 
-
 transaction PublishOffer extends BaseTransaction {
   --> Game game
   o Double amount
@@ -51,7 +50,10 @@ asset Game identified by gameID {
   --> Prosumer[] buyersOrdered
   o Integer nrBuyers default = 0
   o Integer nrSellers default = 0
-  
+
+  // Hop histances
+  o DistanceVector[] hopDistances
+
   // Offers
   o Double[] offersAmounts 
   o Double[] offersPrices
@@ -71,7 +73,11 @@ concept BuyBid {
   o Double[] bidAmounts
 }
 
-// TODO: Split into 2 transactions (PublishBuyBid, LeaveGame)?
+concept DistanceVector {
+  o Integer[] hops
+}
+
+// TODO: Split possibly into 2 transactions (PublishBuyBid, LeaveGame)
 transaction PublishBuyBid extends BaseTransaction {
   --> Game game
   o Double[] bidAmounts optional

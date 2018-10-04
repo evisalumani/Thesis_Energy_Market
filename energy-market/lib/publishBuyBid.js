@@ -98,7 +98,7 @@ async function onPublishBuyBid(buyBidTx) {
             gameFinishedEvent.totalNrRounds = game.nrRounds;
             emit(gameFinishedEvent);
 
-            await createEnergyDeliveryMonitor(game, factory, transferRegistry, monitorRegistry);
+            await createEnergyDeliveryMonitor(game, factory, transferRegistry, monitorRegistry, prosumerRegistry);
             return;
         } 
 
@@ -108,7 +108,7 @@ async function onPublishBuyBid(buyBidTx) {
             gameFinishedEvent.totalNrRounds = game.nrRounds;
             emit(gameFinishedEvent);
 
-            await createEnergyDeliveryMonitor(game, factory, transferRegistry, monitorRegistry);
+            await createEnergyDeliveryMonitor(game, factory, transferRegistry, monitorRegistry, prosumerRegistry);
             return;
         }
 
@@ -117,7 +117,6 @@ async function onPublishBuyBid(buyBidTx) {
         game.buyersKeepPlayingPrevious = game.buyersKeepPlaying.slice(); // Copy contents
         game.buyersKeepPlaying = Array.from(Array(nrBuyers), function() { return true; });
         game.buyersPlayedCurrentRound = Array.from(Array(nrBuyers), function() { return false; });
-
 
         // Update nextBuyerIndex
         // Start again from the 1st buyer in a new game round
@@ -177,7 +176,7 @@ function isViciousCircle(keepPlaying, keepPlayingPrevious) {
     return nrKeepPlaying == 2;
 }
 
-async function createEnergyDeliveryMonitor(game, factory, transferRegistry, monitorRegistry) {
+async function createEnergyDeliveryMonitor(game, factory, transferRegistry, monitorRegistry, prosumerRegistry) {
     let monitor = factory.newResource(NAMESPACE, ENERGY_DELIVERY_MONITOR, `Monitor.${game.$identifier}`);
     monitor.game = factory.newRelationship(NAMESPACE, GAME, game.$identifier);
     monitor.totalInByBuyer = Array.from(Array(game.nrBuyers), () => 0 );
@@ -186,26 +185,64 @@ async function createEnergyDeliveryMonitor(game, factory, transferRegistry, moni
     monitor.totalOutBySeller = Array.from(Array(game.nrSellers), () => 0 );
     monitor.pendingEnergyTransfers = [];
 
+    const sellersLoad = getSellersLoad(game);
+
     for (let i=0; i<game.nrBuyers; i++) {
+        let buyerRef = game.buyersOrdered[i];
+        let buyer = await prosumerRegistry.get(buyerRef.$identifier); 
+
         for (let j=0; j<game.nrSellers; j++) {
             let transfer = factory.newResource(NAMESPACE, ENERGY_TRANSFER, `EnergyTransfer.${game.$identifier}.${uuidv4()}`);
             transfer.game = factory.newRelationship(NAMESPACE, GAME, game.$identifier);
             const seller = game.sellers[j];
-            const buyer = game.buyersOrdered[i];
             transfer.from = factory.newRelationship(NAMESPACE, PROSUMER, seller.$identifier);
             transfer.to = factory.newRelationship(NAMESPACE, PROSUMER, buyer.$identifier);
             transfer.amount = game.buyBids[i].bidAmounts[j];
-            // TODO: Update cost
-
-            // TODO: freeze fund
-            transfer.cost = 10; 
+            
+            // Calculate cost (based on seller's price, load and transmission cost)
+            const cost = transfer.amount * (game.offersPrices[j] * sellersLoad[j] + TRANSMISSION_COST_PER_HOP * game.hopDistances[i].hops[j]); 
+            transfer.cost = cost;
 
             await transferRegistry.add(transfer);
             monitor.pendingEnergyTransfers.push(transfer);
+
+            // Freeze funds on buyer's account
+            buyer.frozenFunds = buyer.frozenFunds + cost;
         }
+
+        // Update regsitry for prosumer's frozen funds
+        await prosumerRegistry.update(buyer);
     }
 
     await monitorRegistry.add(monitor);
+}
+
+function getSellersUsedCapacities(game) {
+    const nrSellers = game.nrSellers;
+    const buyBids = game.buyBids;
+    
+    let usedCapacities = Array.from(Array(nrSellers), () => 0 );
+
+    for (let i=0; i<buyBids.length; i++) {
+        // Exclude the current buyer from accumulating used capacities by seller 
+        for (let j=0; j<nrSellers; j++) {
+            usedCapacities[j] += buyBids[i].bidAmounts[j];
+        }
+    }
+
+    return usedCapacities;
+}
+
+function getSellersLoad(game) {
+    const offeredCapacities = game.offersAmounts;
+    const usedCapacities = getSellersUsedCapacities(game);
+
+    let sellersLoad = [];
+    for (let i=0; i<game.nrSellers; i++) {
+        sellersLoad[i] = 1 + usedCapacities[i] / offeredCapacities[i];
+    }
+
+    return sellersLoad;
 }
 
 function uuidv4() {
