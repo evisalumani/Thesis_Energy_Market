@@ -1,14 +1,26 @@
-#### Decentralized Energy Trading in Microgrids through Blockchain and Smart Contracts
+# Decentralized Energy Trading in Microgrids through Blockchain and Smart Contracts
 
-##### Setup
+## Overview
+This project combines game theoretic models, which usually model the interaction among market participants in a distributed manner, with the distributed and decentralized architecture of blockchains. The market model is based on the paper [N. Yaagoubi and H. T. Mouftah. "A distributed game theoretic approach to energy trading in the smart grid."](https://ieeexplore.ieee.org/document/7379950). This model enables buyers to iteratively (until convergence) bid on how to allocate their energy demand among the surplus offered from sellers, as a best-response to the other buyers' decisions. The blockchain development framework chosen is Hyperledger, based on the paper [E. Androulaki et al. "Hyperledger Fabric: A Distributed Operating System for Permissioned Blockchains."](https://arxiv.org/abs/1801.10228).
+
+The project is composed of these components:
+
+* energy-market: defines the models and smart contracts using Hyperledger Composer
+* tx-queue: defines an endpoint (Node.js Express) for clients to submit requests to Hyperledger Composer's REST Server in a queue, based on the [queue NPM package](https://www.npmjs.com/package/queue)
+* hyperledger-client: a client for buyers and sellers to interact with the blockchain layer via the tx-queue
+* market-clock: an entity to trigger some time-based events of the market e.g. starting and stopping a game registration window, closing the market etc.
+* optimization-api: an endpoint (Python Flask) for buyers to solve their energy allocation optimization problem, based on Python [SciPy library](https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html)
+* demo: a demo of the project using a [Node.js cluster](https://nodejs.org/api/cluster.html)
+
+## Execution
+### Setup
 
 * [Install Hyperledger prerequisites](https://hyperledger.github.io/composer/latest/installing/installing-prereqs)
 * [Install Hyperledger dev environment (v0.20.0)](https://hyperledger.github.io/composer/latest/installing/development-tools)
 * Install Python numpy and scipy (e.g. via the Anaconda distribution), and Flask
 * In the folders /hyperledger-client, /market-clock and /tx-queue run `npm install`. In the folder /energy-market, run `npm install --python=python2.7`.
 
-
-##### Run
+### Run
 
 * [Deploy the chaincode (Step Four)](https://hyperledger.github.io/composer/latest/tutorials/developer-tutorial)
 * Start the Hyperledger Composer REST server: `composer-rest-server -c admin@energy-market -n never -w true`
@@ -16,13 +28,13 @@
 * Start the optimization API in /optimization-api: `python app.py`
 * (Optional) Start the Hyperledger Playground for visualization: `composer-playgroung`
 
-##### Demo
+### Demo
 * Clear any data in the blockchain: `composer network reset -c admin@energy-market`
 * Add some dummy data for participanting prosumers (in /demo folder): `node mockData.js`
 * Start the market clock (in /market-clock folder): `npm start`
 * Start a cluster of Node.js processes representing prosumers' clients (in /demo folder): `npm start`
 
-##### Log Output (Example)
+### Log Output (Example)
 
 * Terminal of /market-clock
 ```
@@ -157,4 +169,3 @@ MacBook-Pro-4:demo evisa$ npm start
 [P004] [2018-10-03 01:01:50] info: Received GameStopEvent
 [P007] [2018-10-03 01:01:50] info: Received GameStopEvent
 ```
-
